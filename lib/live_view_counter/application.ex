@@ -6,7 +6,10 @@ defmodule LiveViewCounter.Application do
   use Application
 
   def start(_type, _args) do
+    topologies = Application.get_env(:libcluster, :topologies) || []
     children = [
+      # start libcluster
+      {Cluster.Supervisor, [topologies, [name: LiveViewCounter.ClusterSupervisor]]},
       # Start the App State
       LiveViewCounter.Count,
       # Start the Telemetry supervisor

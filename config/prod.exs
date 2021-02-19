@@ -12,7 +12,7 @@ use Mix.Config
 config :live_view_counter, LiveViewCounterWeb.Endpoint,
   load_from_system_env: true,
   http: [port: {:system, "PORT"}],
-  url: [scheme: "https", host: "live-view-counter.herokuapp.com", port: 443],
+  url: [scheme: "https", host: "liveview-counter.fly.dev", port: 443],
   force_ssl: [rewrite_on: [:x_forwarded_proto]],
   cache_static_manifest: "priv/static/cache_manifest.json",
   secret_key_base: Map.fetch!(System.get_env(), "SECRET_KEY_BASE")
@@ -20,8 +20,3 @@ config :live_view_counter, LiveViewCounterWeb.Endpoint,
 
 # Do not print debug messages in production
 config :logger, level: :info
-
-
-# Finally import the config/prod.secret.exs which loads secrets
-# and configuration from environment variables.
-# import_config "prod.secret.exs"

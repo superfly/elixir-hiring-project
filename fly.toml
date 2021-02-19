@@ -1,0 +1,32 @@
+# fly.toml file generated for liveview-counter on 2021-02-18T14:28:52-06:00
+
+app = "liveview-counter"
+
+kill_signal = "SIGTERM"
+kill_timeout = 5
+
+[experimental]
+private_network = true
+
+[[services]]
+  internal_port = 4000
+  protocol = "tcp"
+
+  [services.concurrency]
+    hard_limit = 25
+    soft_limit = 20
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = "80"
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = "443"
+
+  [[services.tcp_checks]]
+    grace_period = "1s"
+    interval = "10s"
+    port = "8080"
+    restart_limit = 0
+    timeout = "2s"

@@ -36,7 +36,7 @@ defmodule LiveViewCounter.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.5.5"},
+      {:phoenix, "~> 1.5.7"},
       {:phoenix_live_view, "~> 0.14.7"},
       {:floki, ">= 0.27.0", only: :test},
       {:phoenix_html, "~> 2.11"},
@@ -47,6 +47,7 @@ defmodule LiveViewCounter.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.3", override: true},
+      {:libcluster, "~> 3.2"},
 
       # Test Code Coverage:
       {:excoveralls, "~> 0.12.2", only: :test}
