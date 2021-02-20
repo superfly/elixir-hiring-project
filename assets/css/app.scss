@@ -2,6 +2,25 @@
 @import "./phoenix.css";
 @import "../node_modules/nprogress/nprogress.css";
 
+/* */
+
+span.region{
+  display: inline-block;
+  margin-right: 15px;
+  height: 40px;
+  padding: 0;
+  padding-right: 10px;
+  margin-left: 20px;
+  background-color: #666666;
+  color: white;
+}
+.icon {
+  width: 40px;
+  height: 40px;
+  vertical-align: middle;
+  margin-left: -20px;
+}
+
 /* LiveView specific classes for your customizations */
 .invalid-feedback {
   color: #a94442;
