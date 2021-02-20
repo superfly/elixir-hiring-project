@@ -28,6 +28,10 @@ defmodule LiveViewCounterWeb.Counter do
     {:noreply, assign(socket, :val, Count.decr())}
   end
 
+  def handle_event("ping", _, socket) do
+    {:reply, %{}, socket}
+  end
+
   def handle_info({:count, count}, socket) do
     {:noreply, assign(socket, val: count)}
   end
@@ -48,6 +52,9 @@ defmodule LiveViewCounterWeb.Counter do
       <button phx-click="dec">-</button>
       <button phx-click="inc">+</button>
       <h1>Current users: <%= @present %></h1>
+    </div>
+    <div>
+      Latency <span id="rtt" phx-hook="RTT" phx-update="ignore"></span>
     </div>
     """
   end

@@ -26,5 +26,8 @@
       </section>
     </header>
     <%= @inner_content %>
+    <footer>
+      <p>Connected to <%= System.get_env("FLY_REGION") || "?" %></p>
+    </footer>
   </body>
 </html>

@@ -25,7 +25,7 @@ private_network = true
     port = "443"
 
   [[services.tcp_checks]]
-    grace_period = "1s"
+    grace_period = "30s" # seems to take about 30s to boot
     interval = "10s"
     port = "8080"
     restart_limit = 0

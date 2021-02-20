@@ -1,6 +1,7 @@
 defmodule Cluster.Strategy.FlyPoll do
+
   @moduledoc """
-  Assumes you have nodes that respond to the specified DNS query (AAAA record), and which follow the node name pattern of
+  Assumes you have nodes that respond to the specified DNS query (A record), and which follow the node name pattern of
   `<name>@<ip-address>`. If your setup matches those assumptions, this strategy will periodically poll DNS and connect
   all nodes it finds.
 
@@ -109,11 +110,10 @@ defmodule Cluster.Strategy.FlyPoll do
       Keyword.get(config, :resolver, fn query ->
         query
         |> String.to_charlist()
-        |> :inet_res.lookup(:in, :aaaa)
+        |> lookup_all_ips
       end)
 
-    result = resolve(query, node_basename, resolver, state)
-    result
+    resolve(query, node_basename, resolver, state)
   end
 
   # query for all ips responding to a given dns query
@@ -121,10 +121,8 @@ defmodule Cluster.Strategy.FlyPoll do
   # filter out me
   defp resolve({:ok, query}, {:ok, node_basename}, resolver, %State{topology: topology})
        when is_binary(query) and is_binary(node_basename) and query != "" and node_basename != "" do
-    debug(topology, "polling dns for '#{query}' AAAA records")
+    debug(topology, "polling dns for '#{query}'")
     me = node()
-
-    debug(topology, "me #{inspect me}")
 
     query
     |> resolver.()
@@ -154,10 +152,11 @@ defmodule Cluster.Strategy.FlyPoll do
     []
   end
 
-  # turn an ip into a node name atom, assuming that all other node names looks similar to our own name
-  defp format_node({a, b, c, d}, base_name), do: :"#{base_name}@#{a}.#{b}.#{c}.#{d}"
+  def lookup_all_ips(q) do
+    Enum.map([:a, :aaaa], fn t -> :inet_res.lookup(q, :in, t) end) |> List.flatten
+  end
 
-  # turn an ipv6 into a node name atom, assuming that all other node names look similar
+  # turn an ip into a node name atom, assuming that all other node names looks similar to our own name
   defp format_node(ip, base_name), do: :"#{base_name}@#{ip |> :inet_parse.ntoa |> to_string()}"
 
 end
