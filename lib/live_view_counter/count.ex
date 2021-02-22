@@ -7,6 +7,10 @@ defmodule LiveViewCounter.Count do
 
   @start_value 0
 
+  def fly_region do
+    System.get_env("FLY_REGION", "unknown")
+  end
+
   def topic do
     "count"
   end
@@ -45,7 +49,7 @@ defmodule LiveViewCounter.Count do
 
   defp make_change(count, change) do
     new_count = count + change
-    PubSub.broadcast(LiveViewCounter.PubSub, topic(), {:count, new_count})
+    PubSub.broadcast(LiveViewCounter.PubSub, topic(), {:count, new_count, :region, fly_region()})
     {:reply, new_count, new_count}
   end
 end

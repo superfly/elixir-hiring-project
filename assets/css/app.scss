@@ -4,15 +4,14 @@
 
 /* */
 
-span.region{
-  display: inline-block;
-  margin-right: 15px;
-  height: 40px;
-  padding: 0;
-  padding-right: 10px;
-  margin-left: 20px;
-  background-color: #666666;
-  color: white;
+th.region{
+  img{
+    width: 40px;
+    height: 40px;
+    vertical-align: middle;
+    border: 1px solid black;
+    border-radius: 50%;
+  }
 }
 .icon {
   width: 40px;

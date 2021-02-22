@@ -1,7 +1,6 @@
 defmodule LiveViewCounterWeb.Counter do
   use Phoenix.LiveView
 
-  alias LiveViewCounterWeb.Router.Helpers, as: Routes
   alias LiveViewCounter.Count
   alias Phoenix.PubSub
   alias LiveViewCounter.Presence
@@ -12,30 +11,42 @@ defmodule LiveViewCounterWeb.Counter do
   def mount(_params, _session, socket) do
     PubSub.subscribe(LiveViewCounter.PubSub, @topic)
 
-    region = System.get_env("FLY_REGION") || "<unknown>"
-    Presence.track(self(), @presence_topic, socket.id, %{region: region})
+    Presence.track(self(), @presence_topic, socket.id, %{region: fly_region()})
     LiveViewCounterWeb.Endpoint.subscribe(@presence_topic)
 
     list = Presence.list(@presence_topic)
     present = presence_by_region(list)
+    counts = Map.new([{fly_region(), Count.current()}])
 
-    {:ok, assign(socket, val: Count.current(), present: present) }
+    {:ok, assign(socket, counts: counts, present: present, region: fly_region()) }
   end
 
-  def handle_event("inc", _, socket) do
-    {:noreply, assign(socket, :val, Count.incr())}
+  def fly_region do
+    System.get_env("FLY_REGION", "unknown")
   end
 
-  def handle_event("dec", _, socket) do
-    {:noreply, assign(socket, :val, Count.decr())}
+  def handle_event("inc", _, %{ assigns: %{ counts: counts } } = socket) do
+    c = Count.incr()
+    {:noreply, assign(socket, counts: Map.put(counts, fly_region(), c))}
+  end
+
+  def handle_event("dec", _, %{ assigns: %{ counts: counts } } = socket) do
+    c = Count.decr()
+    {:noreply, assign(socket, counts: Map.put(counts, fly_region(), c))}
   end
 
   def handle_event("ping", _, socket) do
     {:reply, %{}, socket}
   end
 
-  def handle_info({:count, count}, socket) do
-    {:noreply, assign(socket, val: count)}
+  def handle_info(
+    {:count, count, :region, region},
+    %{ assigns: %{ counts: counts } } = socket
+    ) do
+
+    new_counts = Map.put(counts, region, count)
+
+    {:noreply, assign(socket, counts: new_counts)}
   end
 
   def handle_info(
@@ -46,46 +57,62 @@ defmodule LiveViewCounterWeb.Counter do
     adds = presence_by_region(joins)
     subtracts = presence_by_region(leaves)
 
-    new_present = %{}
-    for {k,v} <- adds do
-      new_present = Map.put(new_present, k, (new_present[k] || 0) + length(v))
-    end
-    for {k,v} <- subtracts do
-      new_present = Map.put(new_present, k, (new_present[k] || 0) - length(v))
-    end
+    new_present = Map.merge(present, adds, fn _k, v1, v2 ->
+      v1 + v2
+    end)
 
-    #new_present = present + map_size(joins) - map_size(leaves)
+    new_present = Map.merge(new_present, subtracts, fn _k, v1, v2 ->
+      v1 - v2
+    end)
 
 
     {:noreply, assign(socket, :present, new_present)}
   end
 
-  @spec presence_by_region(Enum) :: Map
-  def presence_by_region(list) do
-    list
-    # |> IO.inspect
-    |> Enum.flat_map(fn {_, %{metas: metas}} -> metas end)
-    |> Enum.filter(fn m -> m[:region] != nil end)
-    |> Enum.group_by(fn r -> Map.get(r, :region) end)
-    # |> IO.inspect
+  @type presence_entry :: {any(), %{metas: list(%{ atom() => any() })}}
+  @spec presence_by_region(list(presence_entry)) :: %{any() =>  non_neg_integer()}
+  def presence_by_region(presence) do
+    result = presence
+              |> Enum.map(&(elem(&1,1)))
+              |> Enum.flat_map(&Map.get(&1, :metas))
+              |> Enum.filter(&Map.has_key?(&1, :region))
+              |> Enum.group_by(&Map.get(&1, :region))
+              |> Enum.sort_by(&(elem(&1, 0)))
+              |> Map.new(fn {k,v}-> {k, length(v) } end)
+
+    result
   end
 
   def render(assigns) do
     ~L"""
     <div>
-      <h1>The count is: <%= @val %></h1>
+      <h1>The count is: <%= Map.values(@counts) |> Enum.sum %></h1>
       <button phx-click="dec">-</button>
       <button phx-click="inc">+</button>
-      <h1>Current users</h1>
-      <%= for {k,v} <- @present do %>
-      <h2>
-      <span class="region">
-        <%= k %></span> <%= length(v) %>
-      </h2>
-      <% end %>
+
+      <table>
+        <tr>
+          <th>Region</th>
+          <th>Users</th>
+          <th>Clicks</th>
+        </tr>
+        <%= for {k, v} <- @present do %>
+        <tr>
+          <th class="region">
+            <img src="https://fly.io/ui/images/<%= k %>.svg" />
+            <%= k %>
+          </th>
+          <td><%= v %></td>
+          <td><%= Map.get(@counts, to_string(k), 0) %></td>
+        </tr>
+        <% end %>
+      </table>
     </div>
     <div>
       Latency <span id="rtt" phx-hook="RTT" phx-update="ignore"></span>
+    </div>
+    <div>
+      Connected to <%= @region || "?" %>
     </div>
     """
   end

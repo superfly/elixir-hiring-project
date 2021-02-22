@@ -47,7 +47,7 @@ defmodule LiveViewCounter.MixProject do
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.3", override: true},
-      {:libcluster, "~> 3.2"},
+      {:libcluster, "~> 3.2.2"},
 
       # Test Code Coverage:
       {:excoveralls, "~> 0.12.2", only: :test}
