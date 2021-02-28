@@ -49,5 +49,6 @@ We have two specific things we're looking for:
 Don't waste time on:
 
 * Deploying the app, running it locally is just fine
-* Updating the README
+* Updating the README or writing docs
+* Writing tests
 * Design / refactoring / other cleanup
