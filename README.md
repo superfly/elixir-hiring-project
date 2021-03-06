@@ -32,7 +32,7 @@ We expect this to take about two hours for experience Elixir/Phoenix devs, but y
 2. Create a branch for your changes
 3. Do some development
 4. When you're ready, create a patchset to submit
-   * `git diff master <your-branch> > fly-work-sample.patch.txt`
+   * `git diff main <your-branch> > fly-work-sample.patch.txt`
 5. Email the patch to jobs+elixir@fly.io (or reply to your existing email chain)
 
 ## Evaluation process
